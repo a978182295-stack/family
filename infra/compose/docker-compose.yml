@@ -47,7 +47,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "node -e \"fetch('http://127.0.0.1:${AI_GATEWAY_PORT:-3100}/health').then(r=>r.json()).then(j=>process.exit(j&&j.status?0:1)).catch(()=>process.exit(1))\""
+          "node -e \"fetch('http://127.0.0.1:${AI_GATEWAY_PORT:-3100}/health').then(r=>r.json()).then(j=>process.exit(j&&j.status==='ok'?0:1)).catch(()=>process.exit(1))\""
         ]
       interval: 5s
       timeout: 3s
@@ -71,7 +71,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "node -e \"fetch('http://127.0.0.1:${API_PORT:-3000}/health').then(r=>r.json()).then(j=>process.exit(j&&j.status?0:1)).catch(()=>process.exit(1))\""
+          "node -e \"fetch('http://127.0.0.1:${API_PORT:-3000}/health').then(r=>r.json()).then(j=>process.exit(j&&j.status==='ok'?0:1)).catch(()=>process.exit(1))\""
         ]
       interval: 5s
       timeout: 3s
@@ -95,7 +95,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "node -e \"fetch('http://127.0.0.1:${WORKER_PORT:-3200}/health').then(r=>r.json()).then(j=>process.exit(j&&j.status?0:1)).catch(()=>process.exit(1))\""
+          "node -e \"fetch('http://127.0.0.1:${WORKER_PORT:-3200}/health').then(r=>r.json()).then(j=>process.exit(j&&j.status==='ok'?0:1)).catch(()=>process.exit(1))\""
         ]
       interval: 5s
       timeout: 3s
