@@ -6,7 +6,22 @@ import { AppModule } from '../src/app.module';
 describe('AI Gateway (e2e)', () => {
   let app: INestApplication;
 
+  const prev = {
+    AI_MODE: process.env.AI_MODE,
+    CLOUD_API_KEY: process.env.CLOUD_API_KEY,
+    LOCAL_LLM_ENDPOINT: process.env.LOCAL_LLM_ENDPOINT,
+  };
+
   beforeAll(async () => {
+    process.env.AI_MODE = process.env.AI_MODE ?? 'cloud';
+
+    if (process.env.AI_MODE === 'cloud') {
+      process.env.CLOUD_API_KEY = process.env.CLOUD_API_KEY ?? 'test-key';
+    } else {
+      process.env.LOCAL_LLM_ENDPOINT =
+        process.env.LOCAL_LLM_ENDPOINT ?? 'http://localhost:11434';
+    }
+
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -17,6 +32,10 @@ describe('AI Gateway (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
+
+    process.env.AI_MODE = prev.AI_MODE;
+    process.env.CLOUD_API_KEY = prev.CLOUD_API_KEY;
+    process.env.LOCAL_LLM_ENDPOINT = prev.LOCAL_LLM_ENDPOINT;
   });
 
   it('GET /health returns 200', async () => {
