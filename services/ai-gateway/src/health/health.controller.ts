@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
+import type { HealthResponse } from '@family-hub/schemas';
 import { ConfigHealthIndicator } from './config-health.indicator';
 
 @Controller()
@@ -11,9 +12,16 @@ export class HealthController {
 
   @Get('/health')
   @HealthCheck()
-  check() {
-    return this.health.check([
+  async check(): Promise<HealthResponse> {
+    const result = await this.health.check([
       () => this.configIndicator.isHealthy('config'),
     ]);
+
+    return {
+      status: result.status,
+      info: result.info,
+      error: result.error,
+      details: result.details,
+    };
   }
 }
