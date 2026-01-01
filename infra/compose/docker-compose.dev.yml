@@ -1,0 +1,24 @@
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  ai-gateway:
+    ports:
+      - "${AI_GATEWAY_PORT:-3100}:${AI_GATEWAY_PORT:-3100}"
+
+  api:
+    ports:
+      - "${API_PORT:-3000}:${API_PORT:-3000}"
+
+  worker:
+    ports:
+      - "${WORKER_PORT:-3200}:${WORKER_PORT:-3200}"
+
+  web:
+    ports:
+      - "${WEB_PORT:-5173}:${WEB_PORT:-5173}"
