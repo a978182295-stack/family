@@ -1,4 +1,4 @@
-import { AIErrorCode, AIErrorResponse } from '@family-hub/schemas';
+import { AIErrorCode } from '@family-hub/schemas';
 import { exponentialBackoffRetry } from './retry-strategy'; // 引入重试函数
 
 async function handleErrorCode(errorCode: AIErrorCode, response: any) {
