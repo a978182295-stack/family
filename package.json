@@ -7,7 +7,9 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "compose:up": "docker compose --env-file env/dev.env -f infra/compose/docker-compose.yml -f infra/compose/docker-compose.dev.yml up -d",
+    "compose:down": "docker compose --env-file env/dev.env -f infra/compose/docker-compose.yml -f infra/compose/docker-compose.dev.yml down"
   },
   "devDependencies": {
     "typescript": "5.4.5",
