@@ -36,12 +36,16 @@ docker compose --env-file env/dev.env \
   -f infra/compose/docker-compose.dev.yml \
   up -d
 
+（可选）快捷命令：`pnpm compose:up`
+
 3) 停止
 
 docker compose --env-file env/dev.env \
   -f infra/compose/docker-compose.yml \
   -f infra/compose/docker-compose.dev.yml \
   down
+
+（可选）快捷命令：`pnpm compose:down`
 
 ## Workspace 范围（冻结）
 pnpm workspace 仅扫描：
