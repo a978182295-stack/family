@@ -6,17 +6,17 @@ import Redis from 'ioredis';
 export class RedisHealthIndicator extends HealthIndicator {
   async isHealthy(key: string): Promise<HealthIndicatorResult> {
     const redisUrl = process.env.REDIS_URL ?? 'redis://redis:6379/0';
-    const client = new Redis(redisUrl, { lazyConnect: true });
+    const client = new Redis(redisUrl, { lazyConnect: true, connectTimeout: 2000 });
 
     try {
       await client.connect();
       const pong = await client.ping();
       const ok = pong === 'PONG';
 
-      return this.getStatus(key, ok, { redisUrl });
+      return this.getStatus(key, ok, { redisUrl: this.redact(redisUrl) });
     } catch (err: unknown) {
       return this.getStatus(key, false, {
-        redisUrl,
+        redisUrl: this.redact(redisUrl),
         error: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -25,6 +25,16 @@ export class RedisHealthIndicator extends HealthIndicator {
       } catch {
         // ignore
       }
+    }
+  }
+
+  private redact(url: string): string {
+    try {
+      const u = new URL(url);
+      if (u.password) u.password = '***';
+      return u.toString();
+    } catch {
+      return 'redacted';
     }
   }
 }
