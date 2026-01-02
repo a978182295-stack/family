@@ -1,0 +1,32 @@
+# ---- builder ----
+FROM node:20-alpine AS builder
+
+WORKDIR /repo
+RUN corepack enable
+
+# Copy workspace manifests (for pnpm workspace install)
+COPY pnpm-workspace.yaml package.json tsconfig.base.json ./
+# Lockfile is optional but recommended if present
+COPY pnpm-lock.yaml* ./
+
+# Copy only what we need (can expand later if web depends on workspace packages)
+COPY apps/web ./apps/web
+COPY packages ./packages
+
+# Install only web (and its dependency graph)
+RUN pnpm install --filter @family-hub/web...
+
+# Build web
+RUN pnpm --filter @family-hub/web build
+
+
+# ---- runtime ----
+FROM nginx:1.27-alpine
+
+# Nginx config (default_server + /healthz + SPA fallback)
+COPY apps/web/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Static files
+COPY --from=builder /repo/apps/web/dist /usr/share/nginx/html
+
+EXPOSE 80
