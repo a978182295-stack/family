@@ -1,6 +1,7 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
+ENV CI=true
 RUN corepack enable
 
 COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
