@@ -7,8 +7,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "pnpm -w tsc -p tsconfig.json",
-    "typecheck": "pnpm -w tsc -p tsconfig.json --noEmit",
+    "build": "pnpm -w tsc -p packages/observability/tsconfig.json",
+    "typecheck": "pnpm -w tsc -p packages/observability/tsconfig.json --noEmit",
     "lint": "pnpm -w eslint \"src/**/*.ts\"",
     "format": "pnpm -w prettier --write \"src/**/*.ts\""
   },

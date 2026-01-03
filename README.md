@@ -79,6 +79,53 @@ docker compose --env-file env/dev.env \
   -f infra/compose/docker-compose.prod.yml \
   up -d
 
+## 群晖部署详解（Container Manager / Docker）
+### A. 准备目录与环境文件
+1) 在群晖共享文件夹创建目录：
+   - `/volume1/docker/family/postgres`
+   - `/volume1/docker/family/redis`
+2) 准备环境文件（建议放在 `/volume1/docker/family/env`）：
+   - 复制 `env/dev.env.example` 为 `env/dev.env`
+   - 填写 `POSTGRES_PASSWORD`、`REDIS_PASSWORD`、`DATABASE_URL` 等
+
+### B. GHCR 登录（私有仓库必需）
+准备一个 GitHub PAT，权限至少包含：
+- `read:packages`
+- 若仓库是私有，还需要 `repo`
+
+在群晖终端或 SSH 中登录：
+
+docker login ghcr.io -u <GitHub用户名> -p <PAT>
+
+### C. 使用 Compose 导入（推荐）
+1) 打开 **Container Manager** → **项目** → **新增**
+2) 选择 **导入 Compose**，文件选择：
+   - `infra/compose/docker-compose.yml`
+   - `infra/compose/docker-compose.prod.yml`
+3) 选择环境变量文件：
+   - `env/dev.env`
+4) 点击 **部署**
+
+> 若 GUI 不支持多文件导入，可使用 SSH 方式（见下一节）。
+
+### D. SSH 一键部署（稳定）
+在群晖上执行：
+
+docker compose --env-file /volume1/docker/family/env/dev.env \
+  -f /volume1/docker/family/infra/compose/docker-compose.yml \
+  -f /volume1/docker/family/infra/compose/docker-compose.prod.yml \
+  pull
+
+docker compose --env-file /volume1/docker/family/env/dev.env \
+  -f /volume1/docker/family/infra/compose/docker-compose.yml \
+  -f /volume1/docker/family/infra/compose/docker-compose.prod.yml \
+  up -d
+
+### E. 常见问题排查
+- 镜像拉取失败：确认已 `docker login ghcr.io` 且 PAT 有权限
+- 健康检查失败：确认镜像内有 `curl`/`wget`（本仓库镜像已内置 curl）
+- Web 页面能打开但 API 失败：确保使用 prod 组合（Nginx 反代 /api）
+
 ## Workspace 范围（冻结）
 pnpm workspace 仅扫描：
 - apps/*
