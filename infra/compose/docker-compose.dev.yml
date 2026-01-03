@@ -8,17 +8,29 @@ services:
       - "6379:6379"
 
   ai-gateway:
+    build:
+      context: ../..
+      dockerfile: services/ai-gateway/Dockerfile
     ports:
       - "${AI_GATEWAY_PORT:-3100}:${AI_GATEWAY_PORT:-3100}"
 
   api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
     ports:
       - "${API_PORT:-3000}:${API_PORT:-3000}"
 
   worker:
+    build:
+      context: ../..
+      dockerfile: apps/worker/Dockerfile
     ports:
       - "${WORKER_PORT:-3200}:${WORKER_PORT:-3200}"
 
   web:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile.dev
     ports:
       - "${WEB_PORT:-5173}:${WEB_PORT:-5173}"

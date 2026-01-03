@@ -61,6 +61,24 @@ docker compose --env-file env/dev.env \
 - Postgres: `/volume1/docker/family/postgres`
 - Redis: `/volume1/docker/family/redis`
 
+## 生产镜像（GitHub Actions）
+- CI 会构建并推送以下镜像到 GHCR：
+  - `ghcr.io/a978182295-stack/family-hub-api:prod`
+  - `ghcr.io/a978182295-stack/family-hub-worker:prod`
+  - `ghcr.io/a978182295-stack/family-hub-ai-gateway:prod`
+  - `ghcr.io/a978182295-stack/family-hub-web:prod`
+- 群晖部署推荐先拉取镜像再启动：
+
+docker compose --env-file env/dev.env \
+  -f infra/compose/docker-compose.yml \
+  -f infra/compose/docker-compose.prod.yml \
+  pull
+
+docker compose --env-file env/dev.env \
+  -f infra/compose/docker-compose.yml \
+  -f infra/compose/docker-compose.prod.yml \
+  up -d
+
 ## Workspace 范围（冻结）
 pnpm workspace 仅扫描：
 - apps/*

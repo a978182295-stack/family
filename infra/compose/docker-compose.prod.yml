@@ -8,30 +8,16 @@ services:
       - /volume1/docker/family/redis:/data
 
   ai-gateway:
-    build:
-      context: ../..
-      dockerfile: services/ai-gateway/Dockerfile
-    image: family-hub-ai-gateway:prod
+    image: ghcr.io/a978182295-stack/family-hub-ai-gateway:prod
 
   api:
-    build:
-      context: ../..
-      dockerfile: apps/api/Dockerfile
-    image: family-hub-api:prod
+    image: ghcr.io/a978182295-stack/family-hub-api:prod
 
   worker:
-    build:
-      context: ../..
-      dockerfile: apps/worker/Dockerfile
-    image: family-hub-worker:prod
+    image: ghcr.io/a978182295-stack/family-hub-worker:prod
 
   web:
-    build:
-      context: ../..
-      dockerfile: apps/web/Dockerfile.nginx
-      args:
-        VITE_API_BASE_URL: /api
-    image: family-hub-web:prod
+    image: ghcr.io/a978182295-stack/family-hub-web:prod
     ports:
       - "${WEB_PORT:-8080}:80"
     depends_on:

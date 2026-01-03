@@ -35,9 +35,6 @@ services:
       retries: 20
 
   ai-gateway:
-    build:
-      context: ../..
-      dockerfile: services/ai-gateway/Dockerfile
     image: family-hub-ai-gateway:dev
     environment:
       - PORT=${AI_GATEWAY_PORT:-3100}
@@ -58,9 +55,6 @@ services:
       retries: 5
 
   api:
-    build:
-      context: ../..
-      dockerfile: apps/api/Dockerfile
     image: family-hub-api:dev
     environment:
       PORT: ${API_PORT:-3000}
@@ -84,9 +78,6 @@ services:
       retries: 5
 
   worker:
-    build:
-      context: ../..
-      dockerfile: apps/worker/Dockerfile
     image: family-hub-worker:dev
     environment:
       PORT: ${WORKER_PORT:-3200}
@@ -108,9 +99,6 @@ services:
       retries: 5
 
   web:
-    build:
-      context: ../..
-      dockerfile: apps/web/Dockerfile.dev
     image: family-hub-web:dev
     environment:
       PORT: ${WEB_PORT:-5173}
