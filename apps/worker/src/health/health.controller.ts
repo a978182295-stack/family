@@ -9,7 +9,7 @@ export class HealthController {
     private readonly redisIndicator: RedisHealthIndicator,
   ) {}
 
-  @Get('/health')
+  @Get(['/health', '/healthz'])
   @HealthCheck()
   async check() {
     // Terminus 原生输出形如 { status, info, error, details }

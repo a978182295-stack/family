@@ -1,30 +1,38 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { HealthIndicator, HealthIndicatorResult } from '@nestjs/terminus';
 import Redis from 'ioredis';
 
 @Injectable()
-export class RedisHealthIndicator extends HealthIndicator {
-  async isHealthy(key: string): Promise<HealthIndicatorResult> {
-    const redisUrl = this.resolveRedisUrl();
-    const client = new Redis(redisUrl, { lazyConnect: true });
+export class RedisHealthIndicator extends HealthIndicator implements OnModuleDestroy {
+  private readonly redisUrl = this.resolveRedisUrl();
+  private readonly client = new Redis(this.redisUrl, {
+    lazyConnect: true,
+    connectTimeout: 2000,
+  });
 
+  async isHealthy(key: string): Promise<HealthIndicatorResult> {
     try {
-      await client.connect();
-      const pong = await client.ping();
+      if (this.client.status === 'wait') {
+        await this.client.connect();
+      }
+
+      const pong = await this.client.ping();
       const ok = pong === 'PONG';
 
-      return this.getStatus(key, ok, { redisUrl: this.redact(redisUrl) });
+      return this.getStatus(key, ok, { redisUrl: this.redact(this.redisUrl) });
     } catch (err: unknown) {
       return this.getStatus(key, false, {
-        redisUrl: this.redact(redisUrl),
+        redisUrl: this.redact(this.redisUrl),
         error: err instanceof Error ? err.message : String(err),
       });
-    } finally {
-      try {
-        client.disconnect();
-      } catch {
-        // ignore
-      }
+    }
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    try {
+      await this.client.quit();
+    } catch {
+      // ignore
     }
   }
 

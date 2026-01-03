@@ -12,7 +12,7 @@ export class HealthController {
     private readonly redis: RedisHealthIndicator,
   ) {}
 
-  @Get('/health')
+  @Get(['/health', '/healthz'])
   @HealthCheck()
   async check(): Promise<HealthResponse> {
     const result = await this.health.check([

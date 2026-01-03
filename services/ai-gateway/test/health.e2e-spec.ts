@@ -41,4 +41,8 @@ describe('AI Gateway (e2e)', () => {
   it('GET /health returns 200', async () => {
     await request(app.getHttpServer()).get('/health').expect(200);
   });
+
+  it('GET /healthz returns 200', async () => {
+    await request(app.getHttpServer()).get('/healthz').expect(200);
+  });
 });

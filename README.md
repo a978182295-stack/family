@@ -57,6 +57,7 @@ pnpm workspace 仅扫描：
 ## 健康检查（Readiness）
 - 可执行服务（api/worker/ai-gateway）：
   - 必须提供 GET /health
+  - 必须提供 GET /healthz（Compose healthcheck 使用，可与 /health 返回一致）
   - 输出结构对齐 packages/schemas 的 HealthResponseSchema
   - 使用 @nestjs/terminus
 - Web（SPA/静态站点）：

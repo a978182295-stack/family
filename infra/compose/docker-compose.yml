@@ -28,7 +28,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "redis-cli -h 127.0.0.1 -p 6379 ping | grep -q PONG"
+          "REDISCLI_AUTH=${REDIS_PASSWORD} redis-cli -h 127.0.0.1 -p 6379 ping | grep -q PONG"
         ]
       interval: 5s
       timeout: 3s
@@ -45,7 +45,7 @@ services:
       - LOCAL_LLM_ENDPOINT
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -66,9 +66,9 @@ services:
       AI_GATEWAY_URL: ${AI_GATEWAY_URL:-http://ai-gateway:3100}
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -89,7 +89,7 @@ services:
       AI_GATEWAY_URL: ${AI_GATEWAY_URL:-http://ai-gateway:3100}
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test:
         [

@@ -25,4 +25,10 @@ describe('API (e2e)', () => {
 
     expect(() => HealthResponseSchema.parse(res.body)).not.toThrow();
   });
+
+  it('GET /healthz -> HealthResponse', async () => {
+    const res = await request(app.getHttpServer()).get('/healthz').expect(200);
+
+    expect(() => HealthResponseSchema.parse(res.body)).not.toThrow();
+  });
 });
