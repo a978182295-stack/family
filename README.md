@@ -108,6 +108,11 @@ docker login ghcr.io -u <GitHub用户名> -p <PAT>
 
 > 若 GUI 不支持多文件导入，可使用 SSH 方式（见下一节）。
 
+### C-1. 单文件导入（GUI 兼容性更好）
+如果 GUI 无法选择多个 Compose 文件，请直接使用：
+- `infra/compose/docker-compose.synology.yml`
+并配套选择环境变量文件 `env/dev.env`。
+
 ### D. SSH 一键部署（稳定）
 在群晖上执行：
 
