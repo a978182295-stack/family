@@ -2,6 +2,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 ENV CI=true
+ENV PNPM_STORE_DIR=/app/.pnpm-store
 RUN corepack enable
 
 COPY package.json pnpm-workspace.yaml tsconfig.base.json pnpm-lock.yaml ./
@@ -23,6 +24,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.pnpm-store ./.pnpm-store
 COPY --from=builder /app/services/ai-gateway/package.json ./services/ai-gateway/package.json
 COPY --from=builder /app/services/ai-gateway/node_modules ./services/ai-gateway/node_modules
 COPY --from=builder /app/services/ai-gateway/dist ./services/ai-gateway/dist
