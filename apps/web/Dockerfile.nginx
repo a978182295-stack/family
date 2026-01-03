@@ -3,6 +3,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /repo
 RUN corepack enable
+ARG VITE_API_BASE_URL=/api
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
 # Copy workspace manifests (for pnpm workspace install)
 COPY pnpm-workspace.yaml package.json tsconfig.base.json ./

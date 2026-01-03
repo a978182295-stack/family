@@ -47,6 +47,20 @@ docker compose --env-file env/dev.env \
 
 （可选）快捷命令：`pnpm compose:down`
 
+## 启动（群晖 / 生产环境，base + overlay）
+1) 准备生产 env（参考 env/dev.env.example，自行复制并调整）
+
+2) 启动 Compose（base + prod 覆盖）
+
+docker compose --env-file env/dev.env \
+  -f infra/compose/docker-compose.yml \
+  -f infra/compose/docker-compose.prod.yml \
+  up -d
+
+3) 数据持久化目录（群晖）
+- Postgres: `/volume1/docker/family/postgres`
+- Redis: `/volume1/docker/family/redis`
+
 ## Workspace 范围（冻结）
 pnpm workspace 仅扫描：
 - apps/*
