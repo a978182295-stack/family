@@ -114,6 +114,7 @@ Workspace 扫描范围（硬性）：仅 `apps/*` 、 `services/*` 、 `packages
 ### 5.1 可执行服务（API / Worker / AI Gateway）
 
 - 必须提供 GET /health ，输出结构必须对齐 HealthResponseSchema （定义于 packages/schemas ）。  
+- 必须提供 GET /healthz ，语义与 /health 等价，用于容器内 healthcheck 探测。  
 - 必须采用 @nestjs/terminus 汇总健康指标。  
 - 依赖项最低要求：  
   * apps/api：至少检查 Postgres + Redis  
@@ -132,7 +133,8 @@ Workspace 扫描范围（硬性）：仅 `apps/*` 、 `services/*` 、 `packages
 
 - 在拓扑联通阶段， depends_on 必须使用 condition: service_healthy （禁止仅用启动顺序替代就绪状态）。  
 - 每个容器必须定义 healthcheck 与合理的重试策略。  
-- 容器编排必须使用 condition: service_healthy，且服务必须提供对齐 Schema 的 /health 接口。
+- 容器编排必须使用 condition: service_healthy，且服务必须提供对齐 Schema 的 /health 接口。  
+- Compose healthcheck 对可执行服务的探测端点必须为 /healthz。
 
 ## 第六条：工具链依赖一致性（硬性）
 

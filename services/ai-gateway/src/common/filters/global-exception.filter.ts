@@ -1,14 +1,17 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { AIErrorCode, AIErrorResponseSchema } from '@family-hub/schemas';
+import type { Request, Response } from 'express';
 import { ProviderError } from '../errors/provider-error';
+
+type RequestWithId = Request & { requestId?: string };
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
-    const req: any = ctx.getRequest();
-    const res: any = ctx.getResponse();
+    const req = ctx.getRequest<RequestWithId>();
+    const res = ctx.getResponse<Response>();
 
     // 主路径：由 RequestIdMiddleware 写入
     const requestId = (typeof req?.requestId === 'string' && req.requestId.length > 0)

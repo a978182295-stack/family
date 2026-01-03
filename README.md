@@ -20,8 +20,8 @@
 - Node + pnpm
 - Docker / Docker Compose
 - 运行时约束（当前拓扑联通阶段）：
-  - Node 服务（api/worker/ai-gateway）的容器运行时需支持 `node -e fetch(...)` 健康检查（建议 Node 18+ / 推荐 Node 20 LTS）
-  - web 当前为 dev 镜像形态时也可能使用 node 兜底健康检查；后续如切换为 Nginx 静态托管，需要同步调整 web 健康检查策略（见下文 Runbook）
+  - Node 服务（api/worker/ai-gateway）的容器运行时需要可用的 `curl` 或 `wget`，用于 Compose healthcheck 探测 /healthz；容器内缺少 `curl`/`wget` 会直接导致 healthcheck 失败
+  - web 当前为 dev 镜像形态时同样依赖 `curl`/`wget` 探测 /healthz；后续如切换为 Nginx 静态托管，需要同步调整 web 健康检查策略（见下文 Runbook）
 
 ## 启动（开发环境）
 1) 复制 env 模板为真实 env（不要提交到 git）
@@ -93,9 +93,9 @@ pnpm workspace 仅扫描：
 - 在执行 docker compose up 前，务必确保 env/dev.env 已从 env/dev.env.example 正确复制并替换必要变量。
 - 如果你在宿主机直跑 pnpm dev（非容器），DATABASE_URL 里的 host=postgres 会失效，应切换为 localhost（参考 env/dev.env.example 的注释与示例）。
 
-## 3) healthcheck 与运行时版本不匹配（Node fetch）
-- api/worker/ai-gateway 的 healthcheck 目前使用 `node -e fetch(...)`。
-- 若镜像运行时非 Node 18+（无全局 fetch），healthcheck 会失败。
+## 3) healthcheck 与运行时工具不匹配（curl/wget 缺失）
+- api/worker/ai-gateway 的 healthcheck 使用 `curl`/`wget` 访问 /healthz。
+- 若镜像内缺少 `curl` 或 `wget`，healthcheck 会直接失败。
 - 处理策略：
-  - 统一基础镜像为 Node 18+（推荐 Node 20 LTS），或
-  - 将 healthcheck 改为 curl/wget（需在镜像内提供对应工具）。
+  - 在基础镜像中安装 `curl` 或 `wget`，或
+  - 调整 healthcheck 使用镜像内已存在的探测工具（需同步更新 Compose）。

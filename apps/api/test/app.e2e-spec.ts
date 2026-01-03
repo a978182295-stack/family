@@ -24,11 +24,22 @@ describe('API (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/health').expect(200);
 
     expect(() => HealthResponseSchema.parse(res.body)).not.toThrow();
+    expect(res.headers['x-request-id']).toBeTruthy();
   });
 
   it('GET /healthz -> HealthResponse', async () => {
     const res = await request(app.getHttpServer()).get('/healthz').expect(200);
 
     expect(() => HealthResponseSchema.parse(res.body)).not.toThrow();
+  });
+
+  it('echoes x-request-id when provided', async () => {
+    const requestId = 'e2e-request-id';
+    const res = await request(app.getHttpServer())
+      .get('/healthz')
+      .set('x-request-id', requestId)
+      .expect(200);
+
+    expect(res.headers['x-request-id']).toBe(requestId);
   });
 });
