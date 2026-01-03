@@ -1,0 +1,22 @@
+{
+  "name": "@family-hub/observability",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared request context, logging, and HTTP client utilities",
+  "license": "UNLICENSED",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm -w tsc -p tsconfig.json",
+    "typecheck": "pnpm -w tsc -p tsconfig.json --noEmit",
+    "lint": "pnpm -w eslint \"src/**/*.ts\"",
+    "format": "pnpm -w prettier --write \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@family-hub/schemas": "workspace:*",
+    "pino": "^9.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30"
+  }
+}

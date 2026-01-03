@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
+import type { HealthResponse } from '@family-hub/schemas';
 import { RedisHealthIndicator } from './redis-health.indicator';
 
 @Controller()
@@ -11,7 +12,7 @@ export class HealthController {
 
   @Get(['/health', '/healthz'])
   @HealthCheck()
-  async check() {
+  async check(): Promise<HealthResponse> {
     // Terminus 原生输出形如 { status, info, error, details }
     const result = await this.health.check([() => this.redisIndicator.isHealthy('redis')]);
 

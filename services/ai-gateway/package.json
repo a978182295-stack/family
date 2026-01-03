@@ -14,6 +14,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@family-hub/observability": "workspace:*",
     "@family-hub/schemas": "workspace:*",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",

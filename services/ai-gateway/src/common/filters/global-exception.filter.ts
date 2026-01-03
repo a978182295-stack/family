@@ -37,7 +37,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         retryable: providerError.retryable,
         retryAfterMs: providerError.retryAfterMs,
         provider: providerError.provider,
-        details: providerError.details,
+        details: sanitizeDetails(providerError.details),
       },
     };
 
@@ -45,6 +45,64 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     res.status(providerError.httpStatus).json(safePayload);
   }
+}
+
+const DETAILS_ALLOWED_KEYS = new Set(['reason', 'status', 'type', 'hint', 'field', 'providerCode']);
+const DETAILS_MAX_STRING = 200;
+const DETAILS_MAX_KEYS = 10;
+
+function sanitizeDetails(details: unknown): Record<string, unknown> | undefined {
+  if (!details || typeof details !== 'object' || Array.isArray(details)) {
+    return undefined;
+  }
+
+  if (!DETAILS_ALLOWED_KEYS.size) {
+    return undefined;
+  }
+
+  const entries = Object.entries(details as Record<string, unknown>).filter(([key]) =>
+    DETAILS_ALLOWED_KEYS.has(key),
+  );
+
+  if (entries.length === 0) {
+    return undefined;
+  }
+
+  const sanitized: Record<string, string | number | boolean | null> = {};
+  let truncated = false;
+  let count = 0;
+
+  for (const [key, value] of entries) {
+    if (count >= DETAILS_MAX_KEYS) {
+      truncated = true;
+      break;
+    }
+
+    if (typeof value === 'string') {
+      sanitized[key] =
+        value.length > DETAILS_MAX_STRING ? `${value.slice(0, DETAILS_MAX_STRING)}...` : value;
+      if (value.length > DETAILS_MAX_STRING) {
+        truncated = true;
+      }
+      count += 1;
+      continue;
+    }
+
+    if (typeof value === 'number' || typeof value === 'boolean' || value === null) {
+      sanitized[key] = value;
+      count += 1;
+    }
+  }
+
+  if (Object.keys(sanitized).length === 0) {
+    return undefined;
+  }
+
+  if (truncated) {
+    sanitized.truncated = true;
+  }
+
+  return sanitized;
 }
 
 function ensureSchema(payload: unknown, requestId: string) {
