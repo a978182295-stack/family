@@ -7,8 +7,8 @@ COPY . .
 
 RUN corepack enable \
   && pnpm install \
-  && pnpm --filter @family-hub/observability build \
   && pnpm --filter @family-hub/schemas build \
+  && pnpm --filter @family-hub/observability build \
   && pnpm --filter @family-hub/worker build
 
 ENV NODE_ENV=production
