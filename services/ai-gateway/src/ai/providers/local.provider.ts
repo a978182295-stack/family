@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import type { AIProvider, AIProviderStatus, GenerateTextRequest, GenerateTextResponse } from '../ai-provider.interface';
-import type { ProviderMeta } from '../ai.types';
+import type { AIProvider } from '../ai-provider.interface';
+import type { AIProviderStatus, GenerateTextRequest, GenerateTextResponse, ProviderMeta } from '../ai.types';
 
 @Injectable()
 export class LocalAIProvider implements AIProvider {
