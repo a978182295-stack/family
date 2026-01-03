@@ -1,17 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Minimal baseline */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --bg: #f6f4ef;
+  --fg: #101312;
+  --muted: #5a5f5c;
+  --card: #ffffff;
+  --accent: #0f766e;
+  --accent-2: #f59e0b;
+  --accent-3: #2563eb;
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", ui-serif, Georgia, serif;
 }
 
 html,
-body {
+body,
+#root {
   height: 100%;
 }
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
+  color: var(--fg);
+  background: radial-gradient(circle at 20% 20%, #fff7e7 0%, transparent 45%),
+    radial-gradient(circle at 80% 0%, #e7f5f4 0%, transparent 55%),
+    linear-gradient(180deg, #f6f4ef 0%, #f1ede4 100%);
+}
+
+.grid-pattern {
+  background-image: linear-gradient(rgba(16, 19, 18, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 19, 18, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.fade-up {
+  animation: fade-up 0.8s ease-out both;
+}
+
+.fade-up-delay {
+  animation: fade-up 0.8s ease-out 0.12s both;
+}
+
+.float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }

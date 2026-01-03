@@ -1,41 +1,181 @@
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto max-w-5xl px-6 py-10">
-        <header className="flex items-center justify-between">
+    <div className="min-h-screen text-[color:var(--fg)]">
+      <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-10">
+        <div className="absolute -left-12 top-24 hidden h-44 w-44 rounded-full bg-emerald-200/40 blur-3xl md:block" />
+        <div className="absolute -right-10 top-12 hidden h-48 w-48 rounded-full bg-amber-200/50 blur-3xl md:block" />
+
+        <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">family-hub</h1>
-            <p className="mt-2 text-sm text-slate-400">
-              健康记录 · 菜谱 · 旅行攻略 · 知识库（一期云端，二期本地）
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-3 py-1 text-xs uppercase tracking-[0.2em] text-emerald-700">
+              family-hub
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </div>
+            <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
+              家庭健康中枢
+              <span className="block font-[family:var(--font-serif)] text-3xl font-medium text-emerald-700 md:text-4xl">
+                生活数据的仪表盘
+              </span>
+            </h1>
+            <p className="mt-4 max-w-xl text-sm text-[color:var(--muted)] md:text-base">
+              健康记录、菜谱、旅行计划与知识库统一进入一张可视化面板。云端/本地模式可切换，
+              保持家庭数据的可控性与可追踪性。
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-2 text-xs text-slate-300">
-            web v0.1
+          <div className="grid w-full gap-3 rounded-2xl border border-black/10 bg-white/70 p-4 md:w-[280px]">
+            <div className="text-xs uppercase tracking-[0.24em] text-emerald-700">
+              System Status
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-[color:var(--muted)]">今日活跃成员</span>
+              <span className="text-lg font-semibold text-emerald-700">3</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {['AI Gateway', 'API', 'Worker'].map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs text-emerald-700"
+                >
+                  {item} OK
+                </span>
+              ))}
+            </div>
           </div>
         </header>
 
-        <main className="mt-10 grid gap-6 md:grid-cols-2">
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-6">
-            <h2 className="text-base font-medium">下一步模块</h2>
-            <ul className="mt-4 space-y-2 text-sm text-slate-300">
-              <li>• 身体维度仪表盘（曲线 + 动效）</li>
-              <li>• 菜谱采集（链接/拍照解析 + 热量）</li>
-              <li>• 旅行攻略（平台文本解析 + 清单）</li>
-              <li>• 知识库（笔记 + 向量检索）</li>
-            </ul>
+        <main className="mt-12 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <section className="grid gap-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="fade-up rounded-3xl border border-black/10 bg-white/80 p-6 shadow-[0_12px_30px_-24px_rgba(16,24,16,0.6)]">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-semibold">健康仪表盘</h2>
+                  <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-700">
+                    活跃
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-[color:var(--muted)]">
+                  体脂、睡眠、心率与训练负荷统一追踪，自动生成趋势卡片。
+                </p>
+                <div className="mt-6 grid grid-cols-3 gap-3 text-sm">
+                  {[
+                    { label: '睡眠', value: '7h 20m' },
+                    { label: '心率', value: '64 bpm' },
+                    { label: '训练', value: '2 / 4' },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-2xl bg-emerald-50 px-3 py-3">
+                      <div className="text-xs uppercase tracking-wide text-emerald-700">
+                        {item.label}
+                      </div>
+                      <div className="mt-1 text-base font-semibold">{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="fade-up-delay grid-pattern relative overflow-hidden rounded-3xl border border-black/10 bg-white/80 p-6">
+                <div className="float-slow absolute right-4 top-6 h-14 w-14 rounded-full bg-amber-300/60" />
+                <h2 className="text-base font-semibold">下一步任务</h2>
+                <p className="mt-2 text-sm text-[color:var(--muted)]">
+                  待处理的家庭事项、菜谱和旅行清单统一追踪。
+                </p>
+                <div className="mt-5 space-y-3 text-sm">
+                  {[
+                    '录入本周体重与体脂',
+                    '生成低糖早餐清单',
+                    '整理春节旅行装备',
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-3 rounded-xl bg-white/80 px-3 py-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-black/10 bg-white/80 p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold">旅行与知识计划</h2>
+                <span className="text-xs text-[color:var(--muted)]">本周更新</span>
+              </div>
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                {[
+                  {
+                    title: '家庭周末路线',
+                    desc: '城市公园 + 轻徒步 + 地图收藏。',
+                    tone: 'bg-blue-50 text-blue-700',
+                  },
+                  {
+                    title: '菜谱采集',
+                    desc: '支持链接/拍照解析并自动标注热量。',
+                    tone: 'bg-amber-50 text-amber-700',
+                  },
+                  {
+                    title: '知识库',
+                    desc: '家庭共享笔记 + AI 自动归档。',
+                    tone: 'bg-emerald-50 text-emerald-700',
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-2xl border border-black/10 bg-white p-4">
+                    <div className={`inline-flex rounded-full px-3 py-1 text-xs ${item.tone}`}>
+                      规划中
+                    </div>
+                    <h3 className="mt-3 text-sm font-semibold">{item.title}</h3>
+                    <p className="mt-2 text-xs text-[color:var(--muted)]">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-6">
-            <h2 className="text-base font-medium">API 连接（占位）</h2>
-            <p className="mt-4 text-sm text-slate-400">
-              后续会在这里接入 <code className="rounded bg-slate-800 px-1">VITE_API_BASE_URL</code>，
-              并实现健康状态展示与模块导航。
-            </p>
-          </section>
+          <aside className="grid gap-6">
+            <div className="rounded-3xl border border-black/10 bg-white/80 p-6">
+              <h2 className="text-base font-semibold">AI 运行概览</h2>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">
+                云端/本地模型切换与健康状态监控。
+              </p>
+              <div className="mt-6 space-y-4 text-sm">
+                {[
+                  { label: '模式', value: 'Cloud', color: 'text-emerald-700' },
+                  { label: '模型', value: 'Text + Vision', color: 'text-blue-700' },
+                  { label: '请求队列', value: '0 pending', color: 'text-amber-700' },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center justify-between">
+                    <span className="text-[color:var(--muted)]">{item.label}</span>
+                    <span className={`text-sm font-semibold ${item.color}`}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="mt-6 w-full rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_20px_-12px_rgba(15,118,110,0.8)]"
+                type="button"
+              >
+                进入 AI 控制台
+              </button>
+            </div>
+
+            <div className="rounded-3xl border border-black/10 bg-white/80 p-6">
+              <h2 className="text-base font-semibold">今日提醒</h2>
+              <div className="mt-4 space-y-3 text-sm">
+                {[
+                  { title: '睡眠补偿', note: '建议今晚提早 30 分钟就寝。' },
+                  { title: '运动记录', note: '本周还差 1 次训练打卡。' },
+                  { title: '饮水提醒', note: '下午 2 点补水 300ml。' },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-2xl border border-black/5 bg-amber-50/50 px-3 py-3">
+                    <div className="text-xs uppercase tracking-wide text-amber-700">
+                      {item.title}
+                    </div>
+                    <p className="mt-1 text-xs text-[color:var(--muted)]">{item.note}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
         </main>
 
-        <footer className="mt-10 text-xs text-slate-500">
+        <footer className="mt-12 text-xs text-[color:var(--muted)]">
           Constitution-driven development. One-step-per-command.
         </footer>
       </div>
