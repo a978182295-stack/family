@@ -18,7 +18,7 @@ export class HealthController {
 
     // 显式整形输出，确保字段集合对齐 HealthResponseSchema
     return {
-      status: result.status,
+      status: result.status === 'ok' ? 'ok' : 'error',
       info: result.info,
       error: result.error,
       details: result.details,
