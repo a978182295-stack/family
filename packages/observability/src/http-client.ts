@@ -265,7 +265,7 @@ async function parseErrorResponse(
   retryable: boolean;
   retryAfterMs?: number;
 }> {
-  const text = await response.text();
+  const text = await response.clone().text();
   const parsed = tryParseAiError(text);
 
   if (parsed) {

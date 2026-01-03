@@ -4,12 +4,12 @@ WORKDIR /app
 ENV CI=true
 RUN corepack enable
 
-COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
+COPY package.json pnpm-workspace.yaml tsconfig.base.json pnpm-lock.yaml ./
 COPY apps/api ./apps/api
 COPY packages/observability ./packages/observability
 COPY packages/schemas ./packages/schemas
 
-RUN pnpm install \
+RUN pnpm install --frozen-lockfile \
   && pnpm --filter @family-hub/schemas build \
   && pnpm --filter @family-hub/observability build \
   && pnpm --filter @family-hub/api build \
@@ -26,8 +26,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/packages/observability ./packages/observability
-COPY --from=builder /app/packages/schemas ./packages/schemas
+COPY --from=builder /app/packages/observability/package.json ./packages/observability/package.json
+COPY --from=builder /app/packages/observability/dist ./packages/observability/dist
+COPY --from=builder /app/packages/schemas/package.json ./packages/schemas/package.json
+COPY --from=builder /app/packages/schemas/dist ./packages/schemas/dist
 
 WORKDIR /app/apps/api
 CMD ["node", "dist/main.js"]
