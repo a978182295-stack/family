@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import * as Schemas from '@family-hub/schemas';
+import Schemas from '@family-hub/schemas';
+import type { AiPromptRequest, GenerateTextRequest } from '@family-hub/schemas';
 import { apiFetch } from './api';
 import { clearAccessToken, getAccessToken, handleOidcCallback, loginWithOidc } from './oidc';
-
-type AiPromptRequest = Schemas.AiPromptRequest;
-type GenerateTextRequest = Schemas.GenerateTextRequest;
 
 const defaultPrompt: AiPromptRequest = {
   prompt: '',
@@ -35,7 +33,7 @@ export default function App() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  const result = Schemas.AiPromptRequestSchema.safeParse(promptForm);
+    const result = Schemas.AiPromptRequestSchema.safeParse(promptForm);
     if (!result.success) {
       const nextErrors: Partial<Record<keyof AiPromptRequest, string>> = {};
       for (const issue of result.error.issues) {
