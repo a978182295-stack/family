@@ -74,7 +74,7 @@ export class AiCacheService implements OnModuleDestroy {
 
     try {
       await this.client.connect();
-      return this.client.status === 'ready';
+      return true;
     } catch (error) {
       this.logger.warn('AI cache redis unavailable');
       return false;

@@ -18,6 +18,9 @@ COPY packages ./packages
 # Install only web (and its dependency graph)
 RUN pnpm install --filter @family-hub/web...
 
+# Build shared schemas for web bundling
+RUN pnpm --filter @family-hub/schemas build
+
 # Build web
 RUN pnpm --filter @family-hub/web build
 
