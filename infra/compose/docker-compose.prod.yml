@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   postgres:
     volumes:
@@ -8,18 +14,44 @@ services:
       - /volume1/docker/family/redis:/data
 
   ai-gateway:
-    image: ghcr.io/a978182295-stack/family-hub-ai-gateway:prod
+    image: ${IMAGE_REGISTRY:-ghcr.io/a978182295-stack}/family-hub-ai-gateway:${IMAGE_TAG:-prod}
+    logging: *default-logging
+    environment:
+      - AI_PROVIDER_PING_URL
+      - AI_PROVIDER_PING_TIMEOUT_MS
+      - AI_PROVIDER_PING_INTERVAL_MS
 
   api:
-    image: ghcr.io/a978182295-stack/family-hub-api:prod
+    image: ${IMAGE_REGISTRY:-ghcr.io/a978182295-stack}/family-hub-api:${IMAGE_TAG:-prod}
+    logging: *default-logging
+    environment:
+      AUTH_ENABLED: ${AUTH_ENABLED:-true}
+      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-}
+      OIDC_JWKS_URL: ${OIDC_JWKS_URL:-}
+      OIDC_AUDIENCE: ${OIDC_AUDIENCE:-}
 
   worker:
-    image: ghcr.io/a978182295-stack/family-hub-worker:prod
+    image: ${IMAGE_REGISTRY:-ghcr.io/a978182295-stack}/family-hub-worker:${IMAGE_TAG:-prod}
+    logging: *default-logging
 
-  web:
-    image: ghcr.io/a978182295-stack/family-hub-web:prod
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    logging: *default-logging
     ports:
       - "${WEB_PORT:-8080}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      ai-gateway:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+
+  web:
+    image: ${IMAGE_REGISTRY:-ghcr.io/a978182295-stack}/family-hub-web:${IMAGE_TAG:-prod}
+    logging: *default-logging
     depends_on:
       api:
         condition: service_healthy

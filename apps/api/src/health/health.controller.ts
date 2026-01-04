@@ -3,6 +3,7 @@ import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 import type { HealthResponse } from '@family-hub/schemas';
 import { PostgresHealthIndicator } from './postgres-health.indicator';
 import { RedisHealthIndicator } from './redis-health.indicator';
+import { Public } from '../auth/public.decorator';
 
 @Controller()
 export class HealthController {
@@ -13,6 +14,7 @@ export class HealthController {
   ) {}
 
   @Get(['/health', '/healthz'])
+  @Public()
   @HealthCheck()
   async check(): Promise<HealthResponse> {
     const result = await this.health.check([

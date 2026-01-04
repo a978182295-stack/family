@@ -1,4 +1,148 @@
+import { useEffect, useState } from 'react';
+import {
+  AIErrorResponseSchema,
+  AiPromptRequestSchema,
+  GenerateTextRequestSchema,
+  GenerateTextResponseSchema,
+  type AiPromptRequest,
+  type GenerateTextRequest,
+} from '@family-hub/schemas';
+import { apiFetch } from './api';
+import { clearAccessToken, getAccessToken, handleOidcCallback, loginWithOidc } from './oidc';
+
+const defaultPrompt: AiPromptRequest = {
+  prompt: '',
+  intent: 'recipe',
+};
+
+const intentLabels: Record<AiPromptRequest['intent'], string> = {
+  recipe: '菜谱分析',
+  knowledge: '知识库查询',
+  travel: '旅行计划',
+  health: '健康建议',
+};
+
 export default function App() {
+  const [promptForm, setPromptForm] = useState<AiPromptRequest>(defaultPrompt);
+  const [errors, setErrors] = useState<Partial<Record<keyof AiPromptRequest, string>>>({});
+  const [submitted, setSubmitted] = useState<AiPromptRequest | null>(null);
+  const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'anonymous' | 'error'>(
+    'loading',
+  );
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const handleChange = <Key extends keyof AiPromptRequest>(field: Key, value: AiPromptRequest[Key]) => {
+    setPromptForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const result = AiPromptRequestSchema.safeParse(promptForm);
+    if (!result.success) {
+      const nextErrors: Partial<Record<keyof AiPromptRequest, string>> = {};
+      for (const issue of result.error.issues) {
+        const key = issue.path[0] as keyof AiPromptRequest | undefined;
+        if (key && !nextErrors[key]) {
+          nextErrors[key] = issue.message;
+        }
+      }
+      setErrors(nextErrors);
+      return;
+    }
+
+    setErrors({});
+    setSubmitted(result.data);
+    setAiResponse(null);
+    setAiError(null);
+
+    const requestPayload: GenerateTextRequest = {
+      messages: [
+        {
+          role: 'system',
+          content: `你是家庭助手，当前场景：${intentLabels[result.data.intent]}`,
+        },
+        {
+          role: 'user',
+          content: result.data.prompt,
+        },
+      ],
+      temperature: 0.4,
+    };
+
+    const payloadCheck = GenerateTextRequestSchema.safeParse(requestPayload);
+    if (!payloadCheck.success) {
+      setAiError('请求格式不合法，请稍后重试。');
+      return;
+    }
+
+    try {
+      const response = await apiFetch('/v1/ai/generate-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadCheck.data),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        const parsedError = AIErrorResponseSchema.safeParse(data);
+        setAiError(parsedError.success ? parsedError.data.error.message : '请求失败');
+        return;
+      }
+
+      const parsed = GenerateTextResponseSchema.safeParse(data);
+      if (!parsed.success) {
+        setAiError('响应解析失败，请稍后重试。');
+        return;
+      }
+
+      setAiResponse(parsed.data.content);
+      setPromptForm(defaultPrompt);
+    } catch (error) {
+      setAiError(error instanceof Error ? error.message : '网络异常');
+    }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await handleOidcCallback();
+        setAuthError(null);
+      } catch (error) {
+        setAuthError(error instanceof Error ? error.message : 'OIDC 登录失败');
+      } finally {
+        setAuthStatus(getAccessToken() ? 'authenticated' : 'anonymous');
+      }
+    };
+
+    void init();
+  }, []);
+
+  useEffect(() => {
+    if (authStatus !== 'authenticated') {
+      return;
+    }
+
+    void apiFetch('/health').catch(() => {
+      // background probe only; UI handled elsewhere
+    });
+  }, [authStatus]);
+
+  const handleLogin = async () => {
+    try {
+      await loginWithOidc();
+    } catch (error) {
+      setAuthStatus('error');
+      setAuthError(error instanceof Error ? error.message : 'OIDC 配置缺失');
+    }
+  };
+
+  const handleLogout = () => {
+    clearAccessToken();
+    setAuthStatus('anonymous');
+  };
+
   return (
     <div className="min-h-screen text-[color:var(--fg)]">
       <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-10">
@@ -131,6 +275,47 @@ export default function App() {
 
           <aside className="grid gap-6">
             <div className="rounded-3xl border border-black/10 bg-white/80 p-6">
+              <h2 className="text-base font-semibold">家庭身份</h2>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">
+                使用 OIDC 连接家庭私有身份系统。
+              </p>
+              <div className="mt-4 space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-[color:var(--muted)]">状态</span>
+                  <span className="text-sm font-semibold">
+                    {authStatus === 'authenticated'
+                      ? '已连接'
+                      : authStatus === 'loading'
+                        ? '检查中'
+                        : '未连接'}
+                  </span>
+                </div>
+                {authError ? (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                    {authError}
+                  </div>
+                ) : null}
+                {authStatus === 'authenticated' ? (
+                  <button
+                    className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-700"
+                    type="button"
+                    onClick={handleLogout}
+                  >
+                    退出
+                  </button>
+                ) : (
+                  <button
+                    className="w-full rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white"
+                    type="button"
+                    onClick={handleLogin}
+                  >
+                    连接账号
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-black/10 bg-white/80 p-6">
               <h2 className="text-base font-semibold">AI 运行概览</h2>
               <p className="mt-2 text-sm text-[color:var(--muted)]">
                 云端/本地模型切换与健康状态监控。
@@ -153,6 +338,71 @@ export default function App() {
               >
                 进入 AI 控制台
               </button>
+            </div>
+
+            <div className="rounded-3xl border border-black/10 bg-white/80 p-6">
+              <h2 className="text-base font-semibold">AI 快速请求</h2>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">
+                使用共享 Schema 校验输入，确保前后端类型一致。
+              </p>
+              <form className="mt-4 space-y-3 text-sm" onSubmit={handleSubmit}>
+                <div className="space-y-2">
+                  <label className="text-xs uppercase tracking-wide text-emerald-700" htmlFor="intent">
+                    场景
+                  </label>
+                  <select
+                    id="intent"
+                    className="w-full rounded-xl border border-black/10 bg-white px-3 py-2"
+                    value={promptForm.intent}
+                    onChange={(event) =>
+                      handleChange('intent', event.target.value as AiPromptRequest['intent'])
+                    }
+                  >
+                    {Object.entries(intentLabels).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs uppercase tracking-wide text-emerald-700" htmlFor="prompt">
+                    提示内容
+                  </label>
+                  <textarea
+                    id="prompt"
+                    className="min-h-[110px] w-full rounded-xl border border-black/10 bg-white px-3 py-2"
+                    placeholder="例如：分析这周菜谱并标注蛋白质含量。"
+                    value={promptForm.prompt}
+                    onChange={(event) => handleChange('prompt', event.target.value)}
+                  />
+                  {errors.prompt ? (
+                    <div className="text-xs text-amber-700">{errors.prompt}</div>
+                  ) : null}
+                </div>
+                <button
+                  className="w-full rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white"
+                  type="submit"
+                >
+                  发送请求
+                </button>
+              </form>
+              {submitted ? (
+                <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-xs text-emerald-700">
+                  已提交：{intentLabels[submitted.intent]} · {submitted.prompt.slice(0, 40)}
+                  {submitted.prompt.length > 40 ? '…' : ''}
+                </div>
+              ) : null}
+              {aiResponse ? (
+                <div className="mt-4 whitespace-pre-wrap rounded-2xl border border-black/10 bg-white px-3 py-3 text-xs text-[color:var(--fg)]">
+                  {aiResponse}
+                </div>
+              ) : null}
+              {aiError ? (
+                <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-700">
+                  {aiError}
+                </div>
+              ) : null}
             </div>
 
             <div className="rounded-3xl border border-black/10 bg-white/80 p-6">

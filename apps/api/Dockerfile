@@ -28,10 +28,14 @@ COPY --from=builder /app/.pnpm-store ./.pnpm-store
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /app/packages/observability/package.json ./packages/observability/package.json
 COPY --from=builder /app/packages/observability/dist ./packages/observability/dist
 COPY --from=builder /app/packages/schemas/package.json ./packages/schemas/package.json
 COPY --from=builder /app/packages/schemas/dist ./packages/schemas/dist
+COPY apps/api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 WORKDIR /app/apps/api
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "dist/main.js"]

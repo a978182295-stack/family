@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   postgres:
     image: postgres:16
@@ -35,10 +41,15 @@ services:
       retries: 20
 
   ai-gateway:
-    image: ghcr.io/a978182295-stack/family-hub-ai-gateway:prod
+    image: ${IMAGE_REGISTRY:-ghcr.io/a978182295-stack}/family-hub-ai-gateway:${IMAGE_TAG:-prod}
+    logging: *default-logging
     environment:
       - PORT=${AI_GATEWAY_PORT:-3100}
       - AI_MODE=${AI_MODE:-cloud}
+      - REDIS_URL=${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
+      - AI_PROVIDER_PING_URL
+      - AI_PROVIDER_PING_TIMEOUT_MS
+      - AI_PROVIDER_PING_INTERVAL_MS
       - CLOUD_API_KEY
       - CLOUD_TEXT_MODEL
       - CLOUD_VISION_MODEL
@@ -55,12 +66,17 @@ services:
       retries: 5
 
   api:
-    image: ghcr.io/a978182295-stack/family-hub-api:prod
+    image: ${IMAGE_REGISTRY:-ghcr.io/a978182295-stack}/family-hub-api:${IMAGE_TAG:-prod}
+    logging: *default-logging
     environment:
       PORT: ${API_PORT:-3000}
       DATABASE_URL: ${DATABASE_URL:-}
       REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
       AI_GATEWAY_URL: ${AI_GATEWAY_URL:-http://ai-gateway:3100}
+      AUTH_ENABLED: ${AUTH_ENABLED:-true}
+      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-}
+      OIDC_JWKS_URL: ${OIDC_JWKS_URL:-}
+      OIDC_AUDIENCE: ${OIDC_AUDIENCE:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -78,7 +94,8 @@ services:
       retries: 5
 
   worker:
-    image: ghcr.io/a978182295-stack/family-hub-worker:prod
+    image: ${IMAGE_REGISTRY:-ghcr.io/a978182295-stack}/family-hub-worker:${IMAGE_TAG:-prod}
+    logging: *default-logging
     environment:
       PORT: ${WORKER_PORT:-3200}
       DATABASE_URL: ${DATABASE_URL:-}
@@ -98,10 +115,24 @@ services:
       timeout: 3s
       retries: 5
 
-  web:
-    image: ghcr.io/a978182295-stack/family-hub-web:prod
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    logging: *default-logging
     ports:
       - "${WEB_PORT:-8080}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      ai-gateway:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+
+  web:
+    image: ${IMAGE_REGISTRY:-ghcr.io/a978182295-stack}/family-hub-web:${IMAGE_TAG:-prod}
+    logging: *default-logging
     depends_on:
       api:
         condition: service_healthy

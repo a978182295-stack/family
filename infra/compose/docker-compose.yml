@@ -39,6 +39,10 @@ services:
     environment:
       - PORT=${AI_GATEWAY_PORT:-3100}
       - AI_MODE=${AI_MODE:-cloud}
+      - REDIS_URL=${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
+      - AI_PROVIDER_PING_URL
+      - AI_PROVIDER_PING_TIMEOUT_MS
+      - AI_PROVIDER_PING_INTERVAL_MS
       - CLOUD_API_KEY
       - CLOUD_TEXT_MODEL
       - CLOUD_VISION_MODEL
@@ -61,6 +65,10 @@ services:
       DATABASE_URL: ${DATABASE_URL:-}
       REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
       AI_GATEWAY_URL: ${AI_GATEWAY_URL:-http://ai-gateway:3100}
+      AUTH_ENABLED: ${AUTH_ENABLED:-false}
+      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-}
+      OIDC_JWKS_URL: ${OIDC_JWKS_URL:-}
+      OIDC_AUDIENCE: ${OIDC_AUDIENCE:-}
     depends_on:
       postgres:
         condition: service_healthy

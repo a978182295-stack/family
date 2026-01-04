@@ -24,7 +24,6 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.pnpm-store ./.pnpm-store
 COPY --from=builder /app/services/ai-gateway/package.json ./services/ai-gateway/package.json
 COPY --from=builder /app/services/ai-gateway/node_modules ./services/ai-gateway/node_modules
 COPY --from=builder /app/services/ai-gateway/dist ./services/ai-gateway/dist
