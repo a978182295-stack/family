@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
-import Schemas from '@family-hub/schemas';
-import type { AiPromptRequest, GenerateTextRequest } from '@family-hub/schemas';
+import { AIErrorResponseSchema } from '@family-hub/schemas/src/ai-error';
+import type { AiPromptRequest } from '@family-hub/schemas/src/ai-request';
+import { AiPromptRequestSchema } from '@family-hub/schemas/src/ai-request';
+import type { GenerateTextRequest } from '@family-hub/schemas/src/ai-gateway';
+import { GenerateTextRequestSchema, GenerateTextResponseSchema } from '@family-hub/schemas/src/ai-gateway';
 import { apiFetch } from './api';
 import { clearAccessToken, getAccessToken, handleOidcCallback, loginWithOidc } from './oidc';
 
@@ -33,7 +36,7 @@ export default function App() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const result = Schemas.AiPromptRequestSchema.safeParse(promptForm);
+    const result = AiPromptRequestSchema.safeParse(promptForm);
     if (!result.success) {
       const nextErrors: Partial<Record<keyof AiPromptRequest, string>> = {};
       for (const issue of result.error.issues) {
@@ -65,7 +68,7 @@ export default function App() {
       temperature: 0.4,
     };
 
-    const payloadCheck = Schemas.GenerateTextRequestSchema.safeParse(requestPayload);
+    const payloadCheck = GenerateTextRequestSchema.safeParse(requestPayload);
     if (!payloadCheck.success) {
       setAiError('请求格式不合法，请稍后重试。');
       return;
@@ -80,12 +83,12 @@ export default function App() {
 
       const data = await response.json();
       if (!response.ok) {
-        const parsedError = Schemas.AIErrorResponseSchema.safeParse(data);
+        const parsedError = AIErrorResponseSchema.safeParse(data);
         setAiError(parsedError.success ? parsedError.data.error.message : '请求失败');
         return;
       }
 
-      const parsed = Schemas.GenerateTextResponseSchema.safeParse(data);
+      const parsed = GenerateTextResponseSchema.safeParse(data);
       if (!parsed.success) {
         setAiError('响应解析失败，请稍后重试。');
         return;
