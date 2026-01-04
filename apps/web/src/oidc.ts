@@ -47,7 +47,7 @@ async function discoverConfig(): Promise<OidcConfig> {
     throw new Error('OIDC issuer not configured.');
   }
 
-  const response = await fetch(`${issuer.replace(/\\/$/, '')}/.well-known/openid-configuration`);
+  const response = await fetch(`${issuer.replace(/\/$/, '')}/.well-known/openid-configuration`);
   if (!response.ok) {
     throw new Error('OIDC discovery failed.');
   }
@@ -66,7 +66,7 @@ function randomString(byteLength = 32): string {
 function base64UrlEncode(input: ArrayBuffer | Uint8Array): string {
   const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
   const binary = String.fromCharCode(...bytes);
-  return btoa(binary).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 async function createCodeChallenge(verifier: string): Promise<string> {
